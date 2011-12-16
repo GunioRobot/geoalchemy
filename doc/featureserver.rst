@@ -33,7 +33,7 @@ We assume that a PostgreSQL server is installed and ready for use. Install PostG
 
     (tg2env)$ easy_install GeoAlchemy
     (tg2env)$ easy_install egenix-mx-base
-    (tg2env)$ easy_install psycopg2 
+    (tg2env)$ easy_install psycopg2
 
 
 Creating a New TG2 App
@@ -62,7 +62,7 @@ We assume that we have to model a layer of roads in our application. We open the
 
 Apart from the standard attributes, we have defined a spatial attribute called `geom` as a `GeometryColumn`. We will use this attribute to store geometry values of data type `LineString` in the database. GeoAlchemy supports other geometry types such as Point, Polygon and Mutiple Geometries. We also pass the dimension of the geometry as a parameter. The Geometry type takes another parameter for the `SRID`. In this case we leave it to its default value of `4326` which means that our geometry values will have geographic latitude and longitude coordinate system. We finally call the GeometryDDL DDL Extension that enables creation and deletion of geometry columns just after and before table create and drop statements respectively. The GeometryColumn, LineString and GeometryDDL must be imported from the geoalchemy package.
 
-Creating Tables in the Database 
+Creating Tables in the Database
 -------------------------------
 
 The database tables can now be created using the setup-app paster command

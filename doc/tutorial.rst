@@ -27,17 +27,17 @@ On Ubuntu the following steps have to executed to create the database.
 	createlang plpgsql gis
 	psql -d gis -f /usr/share/postgresql-8.3-postgis/lwpostgis.sql
 	psql -d gis -f /usr/share/postgresql-8.3-postgis/spatial_ref_sys.sql
-	
+
 	#Create a new user (if a user named 'gis' does not exist already)
 	createuser -P gis
-	
+
 	#Grant permissions to user 'gis' on the new database
 	psql gis
 	grant all on database gis to "gis";
 	grant all on spatial_ref_sys to "gis";
 	grant all on geometry_columns to "gis";
 	\q
-	
+
 
 Initializing SQLAlchemy
 -----------------------
@@ -128,7 +128,7 @@ that support special DDLs required for creation of geometry fields in the
 database.
 
 The above declaration is completely database independent, it could also be used for MySQL or Spatialite.
-Queries written with GeoAlchemy are generic too. GeoAlchemy translates these generic expressions into 
+Queries written with GeoAlchemy are generic too. GeoAlchemy translates these generic expressions into
 the function names that are known by the database, that is currently in use.
 If you want to use a database specific function on a geometry column, like `AsKML` in PostGIS, you will have to set a comparator
 when defining your mapping. For the above example the mapping for `Spot` then would look like this:
@@ -144,12 +144,12 @@ when defining your mapping. For the above example the mapping for `Spot` then wo
         height = Column(Integer)
         created = Column(DateTime, default=datetime.now())
         geom = GeometryColumn(Point(2), comparator=PGComparator)
-        
+
 	# [..]
 
 
 
-Now you can also use PostGIS specific functions on geometry columns. 
+Now you can also use PostGIS specific functions on geometry columns.
 
 .. code-block:: python
 
@@ -157,7 +157,7 @@ Now you can also use PostGIS specific functions on geometry columns.
 	>>> session.scalar(s.geom.wkt)
 	'POINT(-81.4 38.08)'
 
-Note that you do not have to set a comparator, when you want to execute a database specific function 
+Note that you do not have to set a comparator, when you want to execute a database specific function
 on a geometry attribute of an object (*s.geom.kml*) or when you are directly using a function (*pg_functions.kml('POINT(..)')*).
 You only have to set a comparator, when you are using a function on a geometry column (*Spot.geom.kml*).
 
@@ -195,17 +195,17 @@ specified using the Well Known Text (WKT) format using GeoAlchemy
 	spot1 = Spot(name="Gas Station", height=240.8, geom=WKTSpatialElement(wkt_spot1))
 	wkt_spot2 = "POINT(-81.42 37.65)"
 	spot2 = Spot(name="Restaurant", height=233.6, geom=WKTSpatialElement(wkt_spot2))
-	
+
 	wkt_road1 = "LINESTRING(-80.3 38.2, -81.03 38.04, -81.2 37.89)"
 	road1 = Road(name="Peter St", width=6.0, geom=WKTSpatialElement(wkt_road1))
 	wkt_road2 = "LINESTRING(-79.8 38.5, -80.03 38.2, -80.2 37.89)"
 	road2 = Road(name="George Ave", width=8.0, geom=WKTSpatialElement(wkt_road2))
-	
+
 	wkt_lake1 = "POLYGON((-81.3 37.2, -80.63 38.04, -80.02 37.49, -81.3 37.2))"
 	lake1 = Lake(name="Lake Juliet", depth=36.0, geom=WKTSpatialElement(wkt_lake1))
 	wkt_lake2 = "POLYGON((-79.8 38.5, -80.03 38.2, -80.02 37.89, -79.92 37.75, -79.8 38.5))"
 	lake2 = Lake(name="Lake Blue", depth=58.0, geom=WKTSpatialElement(wkt_lake2))
-    
+
     session.add_all([spot1, spot2, road1, road2, lake1, lake2])
     session.commit()
 
@@ -255,13 +255,13 @@ Functions to obtain geometry value in different formats
     >>> import binascii
     >>> binascii.hexlify(session.scalar(s.geom.wkb))
     '01010000007b14ae47e15a54c03333333333d34240'
-    
+
 Note that for all commands above a new query had to be made to the database. Internally
-GeoAlchemy uses Well-Known-Binary (WKB) to fetch the geometry, that belongs to an object of a mapped class. 
+GeoAlchemy uses Well-Known-Binary (WKB) to fetch the geometry, that belongs to an object of a mapped class.
 All the time an object is queried, the geometry for this object is loaded in WKB.
 
 You can also access this internal WKB geometry directly and use it for example to create a
-`Shapely <http://trac.gispython.org/lab/wiki/Shapely>`_ geometry. In this case, no new query has to be made to 
+`Shapely <http://trac.gispython.org/lab/wiki/Shapely>`_ geometry. In this case, no new query has to be made to
 the database.
 
 .. code-block:: python
@@ -325,12 +325,12 @@ Spatial relations for filtering features
     >>> session.query(Spot).filter(Spot.geom.within(box)).count()
     1L
 
-Using the generic functions from *geoalchemy.functions* or the database specific functions from 
+Using the generic functions from *geoalchemy.functions* or the database specific functions from
 *geoalchemy.postgis.pg_functions*, *geoalchemy.mysql.mysql_functions* and *geoalchemy.spatialite.sqlite_functions*,
 more complex queries can be made.
 
 .. code-block:: python
-	
+
 	>>> from geoalchemy.functions import functions
 	>>> session.query(Spot).filter(Spot.geom.within(functions.buffer(functions.centroid(box), 10, 2))).count()
 	2L
@@ -338,4 +338,4 @@ more complex queries can be made.
 	>>> point = 'POINT(-82 38)'
 	>>> session.scalar(pg_functions.gml(functions.transform(point, 2249)))
 	'<gml:Point srsName="EPSG:2249"><gml:coordinates>-2369733.76351267,1553066.7062767</gml:coordinates></gml:Point>'
-	
+

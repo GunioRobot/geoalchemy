@@ -12,16 +12,15 @@ Core
    functions
    dialect
    utils
-   
-Dialects 
+
+Dialects
 --------
 
 .. toctree::
    :maxdepth: 1
-   
+
    postgis
    mysql
    spatialite
    oracle
    mssql
-   

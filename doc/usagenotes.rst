@@ -6,7 +6,7 @@ Notes for Spatialite
 
 Although Python2.5 and its higher versions include sqlite support,
 while using spatialite in python we have to use the db-api module
-provided by `pysqlite2 <http://code.google.com/p/pysqlite/>`_.  So we have to 
+provided by `pysqlite2 <http://code.google.com/p/pysqlite/>`_.  So we have to
 install pysqlite2 separately. Also, by default the pysqlite2 disables extension
 loading. In order to enable extension loading, we have to build it
 ourselves. Download the pysqlite tarball, open the file setup.cfg and
@@ -79,7 +79,7 @@ the module.
 Dimension Information Array (DIMINFO)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-When using a spatial index for a geometry column, Oracle requires a dimension information array 
+When using a spatial index for a geometry column, Oracle requires a dimension information array
 (`Geometry Metadata Views: DIMINFO <http://download.oracle.com/docs/cd/E11882_01/appdev.112/e11830/sdo_objrelschema.htm#sthref300>`_)
 for this column. If you are using the DDL extension of GeoAlchemy to create your tables, you will
 have to set a DIMINFO parameter in your table mapping.
@@ -90,16 +90,16 @@ have to set a DIMINFO parameter in your table mapping.
                 "MDSYS.SDO_DIM_ELEMENT('LONGITUDE', -180, 180, 0.000000005),"\
                 "MDSYS.SDO_DIM_ELEMENT('LATITUDE', -90, 90, 0.000000005)"\
                 ")"
-    
+
     class Lake(Base):
         __tablename__ = 'lakes'
-    
+
         lake_id = Column(Integer, Sequence('lakes_id_seq'), primary_key=True)
         lake_name = Column(String(40))
         lake_geom = GeometryColumn(Polygon(2, diminfo=diminfo), comparator=OracleComparator)
-    
+
 Some geometry functions also expect a DIMINFO array as parameter for every geometry that is passed in
-as parameter. For parameters that are geometry columns or that were queried from the database, GeoAlchemy 
+as parameter. For parameters that are geometry columns or that were queried from the database, GeoAlchemy
 automatically will insert a subquery that selects the DIMINFO array from the metadata view ``ALL_SDO_GEOM_METADATA``
 connected to the geometry.
 
@@ -120,21 +120,21 @@ Example:
 .. code-block:: python
 
     session.query(Lake).filter(Lake.lake_geom.area > 0).first()
-    
+
     l = session.query(Lake).filter(Lake.lake_name=='Lake White').one()
     session.scalar(l.lake_geom.area)
 
-For geometries that do not have an entry in ``ALL_SDO_GEOM_METADATA``, you manually have to 
+For geometries that do not have an entry in ``ALL_SDO_GEOM_METADATA``, you manually have to
 set a DIMINFO array.
 
 .. code-block:: python
-    
+
     from sqlalchemy.sql.expression import text
     diminfo = text("MDSYS.SDO_DIM_ARRAY("\
             "MDSYS.SDO_DIM_ELEMENT('LONGITUDE', -180, 180, 0.000000005),"\
             "MDSYS.SDO_DIM_ELEMENT('LATITUDE', -90, 90, 0.000000005)"\
             ")")
-            
+
     session.scalar(functions.area(WKTSpatialElement('POLYGON((0 0, 1 0, 1 1, 0 1, 0 0))', 4326), diminfo))
 
 If you want to use a different DIMINFO array or a tolerance value as parameter, you have to set the
@@ -152,7 +152,7 @@ ST_GEOMETRY functions
 """""""""""""""""""""""
 
 Oracle supports the SQL/MM geometry type ``ST_GEOMETRY`` (see `ST_GEOMETRY and SDO_GEOMETRY Interoperability
-<http://download.oracle.com/docs/cd/E11882_01/appdev.112/e11830/sdo_sql_mm.htm#CHDCADHC>`_). 
+<http://download.oracle.com/docs/cd/E11882_01/appdev.112/e11830/sdo_sql_mm.htm#CHDCADHC>`_).
 The functions inside the package ``MDSYS.OGC_*`` implement the specification `OGC Simple Feature Access`
 and the functions inside the package ``MDSYS.ST_GEOMETRY.ST_*`` the specification `SQL/MM`.
 
@@ -172,11 +172,11 @@ following:
 - functions.transform
 
 The functions in ``MDSYS.OGC_*`` and ``MDSYS.ST_GEOMETRY.ST_*`` expect the geometry type ``ST_GEOMETRY``.
-GeoAlchemy automatically adds a cast from ``SDO_GEOMETRY``. 
+GeoAlchemy automatically adds a cast from ``SDO_GEOMETRY``.
 
-Some functions, like ``OGC_X`` or ``OGC_IsClosed``, also only work for subtypes of ``ST_GEOMETRY``, so that 
-a cast to the subtype has to be added. If you are executing a function on a geometry column or on a geometry 
-attribute of a mapped instance, GeoAlchemy will insert the cast to the subtype. Otherwise you will have 
+Some functions, like ``OGC_X`` or ``OGC_IsClosed``, also only work for subtypes of ``ST_GEOMETRY``, so that
+a cast to the subtype has to be added. If you are executing a function on a geometry column or on a geometry
+attribute of a mapped instance, GeoAlchemy will insert the cast to the subtype. Otherwise you will have
 to specify the geometry type:
 
 .. code-block:: python
@@ -193,23 +193,23 @@ are used inside a where clause, GeoAlchemy adds a comparision, for example:
 
     session.query(Lake).filter(
                 Lake.lake_geom.sdo_contains('POINT(-88.9055734203822 43.0048567324841)'))
-                        
+
     # is compiled to:
-    SELECT .. 
-    FROM lakes 
-    WHERE SDO_CONTAINS(lakes.lake_geom, MDSYS.SDO_GEOMETRY(:SDO_GEOMETRY_1, :SDO_GEOMETRY_2)) = 'TRUE'    
+    SELECT ..
+    FROM lakes
+    WHERE SDO_CONTAINS(lakes.lake_geom, MDSYS.SDO_GEOMETRY(:SDO_GEOMETRY_1, :SDO_GEOMETRY_2)) = 'TRUE'
 
 Measurement functions
 """""""""""""""""""""
 
-Measurement functions like ``area``, ``length``, ``distance`` and ``within_distance`` by default use meter as unit 
+Measurement functions like ``area``, ``length``, ``distance`` and ``within_distance`` by default use meter as unit
 for geodetic data (like WGS 84) and otherwise the unit 'associated with the data'. If you want to use a different
 unit, you can set it as parameter.
 
 .. code-block:: python
-    
+
     session.scalar(l.lake_geom.area('unit=SQ_KM'))
-    
+
 Member functions
 """"""""""""""""
 
@@ -219,7 +219,7 @@ a table alias has to be used, when the function is called on a geometry column.
 .. code-block:: python
 
     from sqlalchemy.orm import aliased
-    spot_alias = aliased(Spot) 
+    spot_alias = aliased(Spot)
 
     session.query(spot_alias).filter(spot_alias.spot_location.dims == 2).first()
 
@@ -228,14 +228,14 @@ Inserting NULL in geometry columns
 
 When synchronizing mapped instances with the database, SQLAlchemy uses bind parameters for insert/update
 statements. Unfortunately cx_Oracle currently does not support the insertion of ``None`` into geometry columns when
-using bind parameters. 
+using bind parameters.
 
 If you want to insert ``NULL`` you have to use the constant ``oracle.ORACLE_NULL_GEOMETRY``:
 
 .. code-block:: python
 
     from geoalchemy.oracle import ORACLE_NULL_GEOMETRY
-    
+
     spot_null = Spot(spot_height=None, spot_location=ORACLE_NULL_GEOMETRY)
     session.add(spot_null)
     session.commit();
@@ -244,7 +244,7 @@ Notes on DBSpatialElement
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 For the other databases the result of a function call, that returned a new geometry, could be wrapped into a
-`DBSpatialElement <reference/base.html#geoalchemy.base.DBSpatialElement>`_, so that new queries could be executed 
+`DBSpatialElement <reference/base.html#geoalchemy.base.DBSpatialElement>`_, so that new queries could be executed
 on that instance.
 
 For Oracle the returned geometry is an object of ``SDO_Geometry``. cx_Oracle currently does not support
@@ -287,10 +287,10 @@ Sql Server provides a number of additional spatial functions, details of which c
 .. code-block:: python
 
     session.query(Road).filter(Road.road_geom.instance_of('LINESTRING'))
-    
+
     from geoalchemy.mssql import ms_functions
     ms_functions.buffer_with_tolerance('POINT(-88.5945861592357 42.9480095987261)', 10, 2, 0)
-    
+
 * :class:`~geoalchemy.mssql.ms_functions.text_zm`
 * :class:`~geoalchemy.mssql.ms_functions.buffer_with_tolerance`
 * :class:`~geoalchemy.mssql.ms_functions.filter`
@@ -313,7 +313,7 @@ are created by default. To create a spatial index the bounding box must be speci
 
     class Road(Base):
        __tablename__ = 'ROADS'
-   
+
        road_id = Column(Integer, primary_key=True)
        road_name = Column(String(255))
        road_geom = GeometryColumn(Geometry(2, bounding_box='(xmin=-180, ymin=-90, xmax=180, ymax=90)'), nullable=False)
@@ -350,38 +350,38 @@ be set up.
 	from sqlalchemy.orm import *
 	from geoalchemy import *
 	from geoalchemy.postgis import PGComparator
-	
+
 	engine = create_engine('postgresql://gis:gis@localhost/gis', echo=True)
 	metadata = MetaData(engine)
 	session = sessionmaker(bind=engine)()
-	
+
 	# define table
 	spots_table = Table('spots', metadata,
 	                    Column('spot_id', Integer, primary_key=True),
 	                    Column('spot_height', Numeric),
 	                    GeometryExtensionColumn('spot_location', Geometry(2)))
-	
+
 	# define class
 	class Spot(object):
 	    def __init__(self, spot_id=None, spot_height=None, spot_location=None):
 	        self.spot_id = spot_id
 	        self.spot_height = spot_height
 	        self.spot_location = spot_location
-	
-	# set up the mapping between table and class       
+
+	# set up the mapping between table and class
 	mapper(Spot, spots_table, properties={
-	            'spot_location': GeometryColumn(spots_table.c.spot_location, 
-	                                            comparator=PGComparator)}) 
-	
-	# enable the DDL extension   
+	            'spot_location': GeometryColumn(spots_table.c.spot_location,
+	                                            comparator=PGComparator)})
+
+	# enable the DDL extension
 	GeometryDDL(spots_table)
-	
+
 	# create table
 	metadata.create_all()
 
 	# add object
 	session.add(Spot(spot_height=420.40, spot_location='POINT(-88.5945861592357 42.9480095987261)'))
 	session.commit()
-	
+
 	s = session.query(Spot).get(1)
 	print session.scalar(s.spot_location.wkt)

@@ -30,8 +30,8 @@ are supported.
 Support
 -------
 GeoAlchemy is at an early stage of development. Its mailing list is available on
-`Google Groups <http://groups.google.com/group/geoalchemy>`_. The source code can be 
-found on `GitHub <http://github.com/geoalchemy/geoalchemy>`_. Also, feel free to email 
+`Google Groups <http://groups.google.com/group/geoalchemy>`_. The source code can be
+found on `GitHub <http://github.com/geoalchemy/geoalchemy>`_. Also, feel free to email
 the author directly to send bugreports, feature requests, patches, etc.
 
 
